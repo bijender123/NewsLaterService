@@ -4,6 +4,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.stereotype.Component;
@@ -51,5 +53,23 @@ public class DbAdaptor {
         	System.out.println("error " + sqle);
         }
         return true;
+	}
+
+	public boolean addTopicUserMapping(Long user_id, List<String> topic_ids) {
+		String query = "insert ignore into user_topic_mappings (user_id, topic_id) values(?,?)";
+		try {
+			Connection connection = this.ds.getConnection();
+			PreparedStatement statement = connection.prepareStatement(query);
+			for(String topic : topic_ids) {
+				Long topic_id = Long.parseLong(topic);
+				statement.setLong(1, user_id);
+				statement.setLong(2, topic_id);
+				statement.executeUpdate();	
+			}
+		}catch (SQLException sqle) {
+        	System.out.println("error " + sqle);
+        	return false;
+        }
+		return true;
 	}
 }

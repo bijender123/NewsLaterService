@@ -1,6 +1,8 @@
 package com.springrest.springrest.service;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,20 +27,37 @@ public class UserImplement implements UserService {
 
 	@Override
 	public String addUser(String userEmail) {
-		
+		String message  = "";
 		try {
     		if(dbAdaptor.createUser(userEmail)) {
-    			String message = "User created with emailID - " + userEmail;
+    			message = "User created with emailID - " + userEmail;
         		return getSuccessResponse(message);
         	}else {
-        		String message = "User already exists for emailID - " + userEmail;
+        		message = "User already exists for emailID - " + userEmail;
         		return getFailureResponse(message);
         	}
     	}catch(Exception e){
     		
     	}
-		return getFailureResponse("API Error");
+		return getFailureResponse("Internal Server Error");
 	}
+	
+	@Override
+	public String addTopicstoUser(Long user_id, List<String> topicIDs) {
+		String message = "";
+		try {
+			if(dbAdaptor.addTopicUserMapping(user_id, topicIDs)) {
+				message = "Topic added to user";
+				return getSuccessResponse(message);
+			}else {
+				message = "Failed to add topic to user";
+				return getSuccessResponse(message);
+			}
+		}catch (Exception e) {
+		}
+		return getFailureResponse("Internal Server Error");
+	}
+
     
     private String getSuccessResponse(String message) {
         Map<String, String> map = new HashMap<>();
