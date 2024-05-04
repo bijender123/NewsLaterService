@@ -10,6 +10,8 @@ import java.util.List;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.stereotype.Component;
 
+import com.springrest.springrest.modal.Content;
+
 @Component
 public class DbAdaptor {
 
@@ -66,6 +68,23 @@ public class DbAdaptor {
 				statement.setLong(2, topic_id);
 				statement.executeUpdate();	
 			}
+		}catch (SQLException sqle) {
+        	System.out.println("error " + sqle);
+        	return false;
+        }
+		return true;
+	}
+
+	public boolean addContent(Content news_content) {
+		String query = "insert into topic_content_mappings (topic_id, content_title, content_text, live_date) values(?,?,?,?)";
+		try {
+			Connection connection = this.ds.getConnection();
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setLong(1, news_content.getTopic_id());
+			statement.setString(2, news_content.getContent_title());
+			statement.setString(3, news_content.getContent_textString());
+			statement.setString(4, news_content.getLive_date());
+			statement.executeUpdate();
 		}catch (SQLException sqle) {
         	System.out.println("error " + sqle);
         	return false;
