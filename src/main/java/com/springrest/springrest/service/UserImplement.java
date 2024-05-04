@@ -20,7 +20,6 @@ public class UserImplement implements UserService {
 
     private static final String RESPONSE = "response";
     private static final String SUCCESS = "success";
-    private static final String MESSAGE = "message";
     private static final String STATUS = "status";
     private static final String ERROR = "error";
 
@@ -43,17 +42,15 @@ public class UserImplement implements UserService {
     
     private String getSuccessResponse(String message) {
         Map<String, String> map = new HashMap<>();
-        map.put(RESPONSE, SUCCESS);
         map.put(STATUS, SUCCESS);
-        map.put(MESSAGE, message);
+        map.put(RESPONSE, message);
         return gson.toJson(map);
     }
     
     private String getFailureResponse(String message) {
         Map<String, String> map = new HashMap<>();
-        map.put(RESPONSE, SUCCESS);
         map.put(STATUS, ERROR);
-        map.put(MESSAGE, message);
+        map.put(RESPONSE, message);
         return gson.toJson(map);
     }
 	
