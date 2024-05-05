@@ -4,13 +4,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Iterator;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.stereotype.Component;
 
 import com.springrest.springrest.modal.Content;
+import com.springrest.springrest.modal.MailInfo;
 
 @Component
 public class DbAdaptor {
@@ -90,5 +91,30 @@ public class DbAdaptor {
         	return false;
         }
 		return true;
+	}
+
+	public List<MailInfo> getEmailData() {
+		
+		List<MailInfo> output = new ArrayList<MailInfo>();
+		String query = "select u.email_id, tcm.content_title, tcm.content_text, tcm.live_date from topic_content_mappings tcm join topics t " 
+				+ "on t.id = tcm.topic_id join user_topic_mappings utm on utm.topic_id = t.id join users u on u.id = utm.user_id and " 
+				+ "live_date between (now() - interval 1 hour) and now() order by tcm.live_date";
+		try (Connection connection = this.ds.getConnection();
+	            PreparedStatement statement = connection.prepareStatement(query)) {
+	            System.out.println("statement " + statement);
+	            try (ResultSet rs = statement.executeQuery()) {
+	                while(rs.next()) {
+	                	MailInfo info = new MailInfo();
+	                	info.setReceiver(rs.getString(1));
+	                	info.setSubject(rs.getString(2));
+	                	info.setBody(rs.getString(3));
+	                	output.add(info);
+	                }
+	            }
+	        } catch (SQLException sqle) {
+	        	System.out.println("error " + sqle);
+	        }
+		
+		return output;
 	}
 }
