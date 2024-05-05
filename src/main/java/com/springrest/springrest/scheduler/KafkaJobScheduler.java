@@ -20,6 +20,7 @@ public class KafkaJobScheduler {
 	@Autowired
 	private KafkaTemplate<String, String>  topicKafkaTemplate;
 	
+	//FixedRate is in milisecs(running every 1 hour)
 	@Scheduled(fixedRate = 3600000L)
 	public void addEmailContentToQueue() {
 		

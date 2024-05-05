@@ -27,49 +27,54 @@ public class UserImplement implements UserService {
 
 	@Override
 	public String addUser(String userEmail) {
-		String message  = "";
+		Map<String, Object> map = new HashMap<>();
+		map.put("email", userEmail);
 		try {
-    		if(dbAdaptor.createUser(userEmail)) {
-    			message = "User created with emailID - " + userEmail;
-        		return getSuccessResponse(message);
-        	}else {
-        		message = "User already exists for emailID - " + userEmail;
-        		return getFailureResponse(message);
-        	}
+    		Integer user_id = dbAdaptor.createUser(userEmail);
+    		if(user_id>0) {
+    			map.put("user_id", user_id);
+    			return getSuccessResponse(map);
+    		}else {
+    			map.put("error", "DB Error");
+    			return getFailureResponse(map);
+    		}
     	}catch(Exception e){
     		
     	}
-		return getFailureResponse("Internal Server Error");
+		map.put("error", "Internal Server Error");
+		return getFailureResponse(map);
 	}
 	
 	@Override
-	public String addTopicstoUser(Long user_id, List<String> topicIDs) {
-		String message = "";
+	public String addTopicstoUser(Integer user_id, List<Integer> topicIDs) {
+		Map<String, Object> map = new HashMap<>();
 		try {
 			if(dbAdaptor.addTopicUserMapping(user_id, topicIDs)) {
-				message = "Topic added to user";
-				return getSuccessResponse(message);
+				map.put("message", "Topic added to user");
+				return getSuccessResponse(map);
 			}else {
-				message = "Failed to add topic to user";
-				return getFailureResponse(message);
+				map.put("message", "Failed to add topic to user");
+				map.put("error", "DB Error");
+				return getSuccessResponse(map);
 			}
 		}catch (Exception e) {
 		}
-		return getFailureResponse("Internal Server Error");
+		map.put("error", "Internal Server Error");
+		return getFailureResponse(map);
 	}
 
     
-    private String getSuccessResponse(String message) {
-        Map<String, String> map = new HashMap<>();
+    private String getSuccessResponse(Map<String, Object> response) {
+        Map<String, Object> map = new HashMap<>();
         map.put(STATUS, SUCCESS);
-        map.put(RESPONSE, message);
+        map.put(RESPONSE, response);
         return gson.toJson(map);
     }
     
-    private String getFailureResponse(String message) {
-        Map<String, String> map = new HashMap<>();
+    private String getFailureResponse(Map<String, Object> response) {
+        Map<String, Object> map = new HashMap<>();
         map.put(STATUS, ERROR);
-        map.put(RESPONSE, message);
+        map.put(RESPONSE, response);
         return gson.toJson(map);
     }
 	

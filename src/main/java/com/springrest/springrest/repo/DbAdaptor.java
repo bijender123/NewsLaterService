@@ -1,11 +1,13 @@
 package com.springrest.springrest.repo;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.stereotype.Component;
@@ -18,11 +20,15 @@ public class DbAdaptor {
 
 	BasicDataSource ds = new BasicDataSource();
 	
-	public DbAdaptor() {
+	public DbAdaptor() throws IOException {
+		Properties prop = new Properties();
+		prop.load(DbAdaptor.class.getClassLoader().getResourceAsStream("application.properties"));
+		
 		BasicDataSource ds = new BasicDataSource();
-		ds.setUrl("jdbc:mysql://localhost:3306/news_letter");
-		ds.setPassword("root");
-		ds.setUsername("root");
+		ds.setUrl(prop.getProperty("datasource.url"));
+		ds.setPassword(prop.getProperty("datasource.password"));
+		ds.setUsername(prop.getProperty("datasource.username"));
+		System.out.println(prop.getProperty("datasource.url") + " " + prop.getProperty("datasource.password") + " " + prop.getProperty("datasource.username"));
 		ds.setMinIdle(5);
         ds.setMaxIdle(10);
         ds.setMaxOpenPreparedStatements(100);  
@@ -33,40 +39,37 @@ public class DbAdaptor {
 	 * @param email of the user
 	 * @return true if user is created else false
 	 */
-	public boolean createUser(String email){
-		String query = "SELECT id FROM users WHERE email_id = ?";
+	public Integer createUser(String email){
+		String query = "insert into users (email_id) values(?) on duplicate key update email_id = ?";
         try (Connection connection = this.ds.getConnection();
             PreparedStatement statement = connection.prepareStatement(query)) {
             statement.setString(1, email);
-            System.out.println("statement " + statement);
-            try (ResultSet rs = statement.executeQuery()) {
-                if(rs.next()) {
-                    return false;
-                }
-                else {
-                	String insert_query = "insert into users (email_id) values(?)";
-                	PreparedStatement insert_statement = connection.prepareStatement(insert_query);
-                	
-                	insert_statement.setString(1, email);
-                	System.out.println("stmt " + insert_statement);
-                	insert_statement.executeUpdate();
-                }
+            statement.setString(2, email);
+            statement.executeUpdate();
+            
+            String select_query = "SELECT id FROM users WHERE email_id = ?";
+            PreparedStatement select_statement = connection.prepareStatement(select_query);
+            select_statement.setString(1, email);
+            ResultSet rs = select_statement.executeQuery();
+            if(rs.next()) {
+            	Integer user_id = rs.getInt(1);
+            	return user_id;
             }
+            
         } catch (SQLException sqle) {
         	System.out.println("error " + sqle);
         }
-        return true;
+        return -1;
 	}
 
-	public boolean addTopicUserMapping(Long user_id, List<String> topic_ids) {
+	public boolean addTopicUserMapping(Integer user_id, List<Integer> topic_ids) {
 		String query = "insert ignore into user_topic_mappings (user_id, topic_id) values(?,?)";
 		try {
 			Connection connection = this.ds.getConnection();
 			PreparedStatement statement = connection.prepareStatement(query);
-			for(String topic : topic_ids) {
-				Long topic_id = Long.parseLong(topic);
+			for(Integer topic : topic_ids) {
 				statement.setLong(1, user_id);
-				statement.setLong(2, topic_id);
+				statement.setLong(2, topic);
 				statement.executeUpdate();	
 			}
 		}catch (SQLException sqle) {

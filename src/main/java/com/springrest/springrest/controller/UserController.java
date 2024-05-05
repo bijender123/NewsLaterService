@@ -36,12 +36,11 @@ public class UserController {
     }
 	
 	@PostMapping("/addUserTopics")
-    public String addUserTopics(@RequestBody Map<String, String> requestBody) {
-		Long user_id = Long.valueOf(requestBody.get("user_id").toString());
-		String topicStr = (String)requestBody.get("topics");
-	
-		List<String> topics = new ArrayList<String>(Arrays.asList(topicStr.split(",")));
+    public String addUserTopics(@RequestBody Map<String, Object> requestBody) {
+		Integer user_id = Integer.valueOf(requestBody.get("user_id").toString());
+		List<Integer> topics = (List)requestBody.get("topics");
 		System.out.println("request " + new Gson().toJson(requestBody));
+		
     	return userservice.addTopicstoUser(user_id, topics);
     }
 	

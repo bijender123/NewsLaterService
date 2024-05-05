@@ -5,6 +5,6 @@ import java.util.List;
 public interface UserService {
 
 	public String addUser(String email);
-	public String addTopicstoUser(Long user_id, List<String> topicIDs);
+	public String addTopicstoUser(Integer user_id, List<Integer> topicIDs);
 
 }
